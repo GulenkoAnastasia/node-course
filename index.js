@@ -14,11 +14,12 @@ app.use(cors())
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({extended: false}));
 
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 app.get('/api/users', getUserList);
-app.get('/api/users/:_id/logs', getExercises)
+app.get('/api/users/:_id/logs', getExercises);
 
 app.post('/api/users', createUser);
 app.post('/api/users/:_id/exercises', createExercise);

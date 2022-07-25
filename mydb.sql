@@ -1,0 +1,15 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS exercises (
+  id INTEGER PRIMARY KEY,
+  description TEXT NOT NULL,
+  duration INTEGER NOT NULL,
+  date TEXT,
+  user_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
