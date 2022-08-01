@@ -27,6 +27,7 @@ class PromiseDb {
         if(err) {
           reject(err);
         }
+        console.log(arguments)
         resolve({row, statement: this});
       })
     })
@@ -37,6 +38,15 @@ class PromiseDb {
       this._db.exec(query, function (err, row) {
         if (err) reject(err);
         resolve({row, statement: this})
+      })
+    })
+  }
+
+  all(query) {
+    return new Promise((resolve, reject) => {
+      this._db.all(query, function (err, rows) {
+        if (err) reject(err);
+        resolve({rows, statement: this})
       })
     })
   }
