@@ -1,4 +1,3 @@
-const { rmSync } = require('fs');
 const fs = require('fs/promises');
 const path = require('path');
 const validate = require('../utils/exerciseValidation')

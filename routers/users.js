@@ -1,8 +1,9 @@
 const router = require('express').Router();
-const createUser = require('../services/createUser');
+// const createUser = require('../services/createUser');
 const createExercise = require('../services/createExercise');
 const userService = require('../services/users');
 const exercisesService = require('../services/exercises.js');
+const db = require('../db');
 
 
 router.get('/', async function getUserList (req, res) {
@@ -36,7 +37,45 @@ router.get('/:id/logs', async function(req, res) {
   return;
 });
 
-router.post('/', createUser);
-router.post('/:_id/exercises', createExercise);
+router.post('/', async function createUser(req, res) {
+  const userName = req.body.username;
+  const sql = `INSERT INTO users (name) VALUES ("${userName}")`;
+
+  try {
+    const response = await db.run(sql);
+    const user = await userService.fetchById(response.statement.lastID);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(400).send({status: 400, message: "Invalid name"});
+  }
+});
+
+router.post('/:id/exercises', async function createExercise(req, res) {
+  let { description, duration, date} = req.body;
+  date = date === "" ? new Date().toDateString() : new Date(date).toDateString();
+
+  const { id } = req.params;
+
+  const sql = `
+  INSERT INTO exercises (description, duration, date, user_id) 
+  VALUES ("${description}", ${Number(duration)}, "${date}", ${id})`;
+  try {
+    const request = await db.run(sql);
+
+    const sqlQuery = `
+    SELECT users.id, users.name, exercises.date, exercises.duration, exercises.description 
+    FROM exercises 
+    INNER JOIN users 
+    ON exercises.user_id = users.id 
+    WHERE exercises.id = ${request.statement.lastID}`
+  
+    const response = await db.get(sqlQuery);
+    
+    res.status(200).json(await response.row);
+
+  } catch (err) {
+    res.status(400).send({status: 400, message: "bad request"});
+  }
+});
 
 module.exports = router;

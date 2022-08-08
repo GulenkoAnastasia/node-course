@@ -11,7 +11,6 @@ const db = require('../db');
  */
 const fetchList = async (params = undefined) => {
   let query = 'SELECT * FROM exercises';
-  
   if (params && params.filters) {
     const entries = Object.entries(params.filters);
     if (entries.length) {
