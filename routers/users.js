@@ -17,11 +17,13 @@ router.get('/', async function getUserList (req, res) {
 
 router.get('/:id/logs', async function(req, res) {
   const { id } = req.params;
+  
   try {
     const user = await userService.fetchById(id);
     const exercises = await exercisesService.fetchList({
       filters: {
         user_id: id,
+        ...req.query,
       }
     });
     
@@ -52,7 +54,7 @@ router.post('/', async function createUser(req, res) {
 
 router.post('/:id/exercises', async function createExercise(req, res) {
   let { description, duration, date} = req.body;
-  date = date === "" ? new Date().toDateString() : new Date(date).toDateString();
+  date = date || new Date().toISOString;
 
   const { id } = req.params;
 
@@ -71,9 +73,10 @@ router.post('/:id/exercises', async function createExercise(req, res) {
   
     const response = await db.get(sqlQuery);
     
-    res.status(200).json(await response.row);
+    res.status(200).json(await {...response.row, date: new Date(date).toDateString() });
 
   } catch (err) {
+    console.log(err)
     res.status(400).send({status: 400, message: "bad request"});
   }
 });
