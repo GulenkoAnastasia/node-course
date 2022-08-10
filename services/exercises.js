@@ -41,6 +41,39 @@ const fetchList = async (params = undefined) => {
   }
 };
 
+const create = async ({
+  description, duration, date, user_id,
+}) => {
+  const sql = `
+  INSERT INTO exercises (description, duration, date, user_id) 
+  VALUES ("${description}", ${Number(duration)}, "${date}", ${user_id})`;
+
+  try {
+    const response = await db.run(sql);
+    return response;
+  } catch (err) {
+    throw new Error('Can\'t create exercise');
+  }
+};
+
+const fetchById = async (id) => {
+  const sqlQuery = `
+    SELECT users.id, users.name, exercises.date, exercises.duration, exercises.description 
+    FROM exercises 
+    INNER JOIN users 
+    ON exercises.user_id = users.id 
+    WHERE exercises.id = ${id}`;
+
+  try {
+    const response = await db.get(sqlQuery);
+    return response.row;
+  } catch (err) {
+    throw new Error('Can\'t get user exercise');
+  }
+};
+
 module.exports = {
   fetchList,
+  create,
+  fetchById,
 };

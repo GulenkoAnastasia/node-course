@@ -54,22 +54,21 @@ router.post('/:id/exercises', async (req, res) => {
 
   const { id } = req.params;
 
-  const sql = `
-  INSERT INTO exercises (description, duration, date, user_id) 
-  VALUES ("${description}", ${Number(duration)}, "${convertedDate}", ${id})`;
   try {
-    const request = await db.run(sql);
+    const createResponse = await exercisesService.create({
+      description,
+      duration,
+      date: convertedDate,
+      user_id: id,
+    });
 
-    const sqlQuery = `
-    SELECT users.id, users.name, exercises.date, exercises.duration, exercises.description 
-    FROM exercises 
-    INNER JOIN users 
-    ON exercises.user_id = users.id 
-    WHERE exercises.id = ${request.statement.lastID}`;
+    const exerciseResponse = await exercisesService
+      .fetchById(createResponse.statement.lastID);
 
-    const response = await db.get(sqlQuery);
-
-    res.status(200).json(await { ...response.row, date: new Date(convertedDate).toDateString() });
+    res.status(200).json(await {
+      ...exerciseResponse,
+      date: new Date(convertedDate).toDateString(),
+    });
   } catch (err) {
     res.status(400).send({ status: 400, message: 'bad request' });
   }
