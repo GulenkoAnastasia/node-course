@@ -7,7 +7,7 @@ const fetchList = async () => {
   } catch (err) {
     throw new Error('Can\'t get users list');
   }
-}
+};
 
 const fetchById = async (id) => {
   try {
@@ -16,9 +16,9 @@ const fetchById = async (id) => {
   } catch (err) {
     throw new Error('Can\'t fetch user');
   }
-}
+};
 
 module.exports = {
   fetchList,
-  fetchById
-}
+  fetchById,
+};

@@ -1,45 +1,41 @@
 const router = require('express').Router();
-// const createUser = require('../services/createUser');
-const createExercise = require('../services/createExercise');
 const userService = require('../services/users');
-const exercisesService = require('../services/exercises.js');
+const exercisesService = require('../services/exercises');
 const db = require('../db');
 
-
-router.get('/', async function getUserList (req, res) {
+router.get('/', async (req, res) => {
   try {
     const data = await userService.fetchList();
     res.status(200).json(data);
   } catch (err) {
-    res.status(500).json({status: 500, message: err.message});
+    res.status(500).json({ status: 500, message: err.message });
   }
 });
 
-router.get('/:id/logs', async function(req, res) {
+router.get('/:id/logs', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const user = await userService.fetchById(id);
     const exercises = await exercisesService.fetchList({
       filters: {
         user_id: id,
         ...req.query,
-      }
+      },
     });
-    
+
     res.status(200).json({
-      id: id,
+      id,
       username: user.name,
       count: exercises.length,
       log: exercises,
     });
   } catch (err) {
-    res.status(500).json({status: 500, message: err.message});
+    res.status(500).json({ status: 500, message: err.message });
   }
-  return;
 });
 
-router.post('/', async function createUser(req, res) {
+router.post('/', async (req, res) => {
   const userName = req.body.username;
   const sql = `INSERT INTO users (name) VALUES ("${userName}")`;
 
@@ -48,19 +44,19 @@ router.post('/', async function createUser(req, res) {
     const user = await userService.fetchById(response.statement.lastID);
     res.status(200).json(user);
   } catch (err) {
-    res.status(400).send({status: 400, message: "Invalid name"});
+    res.status(400).send({ status: 400, message: 'Invalid name' });
   }
 });
 
-router.post('/:id/exercises', async function createExercise(req, res) {
-  let { description, duration, date} = req.body;
-  date = date || new Date().toISOString;
+router.post('/:id/exercises', async (req, res) => {
+  const { description, duration, date } = req.body;
+  const convertedDate = date || new Date().toISOString;
 
   const { id } = req.params;
 
   const sql = `
   INSERT INTO exercises (description, duration, date, user_id) 
-  VALUES ("${description}", ${Number(duration)}, "${date}", ${id})`;
+  VALUES ("${description}", ${Number(duration)}, "${convertedDate}", ${id})`;
   try {
     const request = await db.run(sql);
 
@@ -69,15 +65,13 @@ router.post('/:id/exercises', async function createExercise(req, res) {
     FROM exercises 
     INNER JOIN users 
     ON exercises.user_id = users.id 
-    WHERE exercises.id = ${request.statement.lastID}`
-  
-    const response = await db.get(sqlQuery);
-    
-    res.status(200).json(await {...response.row, date: new Date(date).toDateString() });
+    WHERE exercises.id = ${request.statement.lastID}`;
 
+    const response = await db.get(sqlQuery);
+
+    res.status(200).json(await { ...response.row, date: new Date(convertedDate).toDateString() });
   } catch (err) {
-    console.log(err)
-    res.status(400).send({status: 400, message: "bad request"});
+    res.status(400).send({ status: 400, message: 'bad request' });
   }
 });
 
