@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const userService = require('../services/users');
 const exercisesService = require('../services/exercises');
-const db = require('../db');
 
 router.get('/', async (req, res) => {
   try {
@@ -37,22 +36,31 @@ router.get('/:id/logs', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const userName = req.body.username;
-  const sql = `INSERT INTO users (name) VALUES ("${userName}")`;
+  if (!userName) {
+    res.status(400).send({ status: 400, message: 'User name is empty' });
+    return;
+  }
 
   try {
-    const response = await db.run(sql);
-    const user = await userService.fetchById(response.statement.lastID);
-    res.status(200).json(user);
+    const createUserResponse = await userService.create(userName);
+    res.status(200).json({
+      id: createUserResponse.statement.lastID,
+      name: userName,
+    });
   } catch (err) {
-    res.status(400).send({ status: 400, message: 'Invalid name' });
+    res.status(400).send({ status: 400, message: err.message });
   }
 });
 
 router.post('/:id/exercises', async (req, res) => {
   const { description, duration, date } = req.body;
-  const convertedDate = date || new Date().toISOString;
+  const convertedDate = date || new Date().toISOString().split('T')[0];
 
   const { id } = req.params;
+  if (!description) {
+    res.status(400).send({ status: 400, message: 'The description is empty' });
+    return;
+  }
 
   try {
     const createResponse = await exercisesService.create({
@@ -65,12 +73,12 @@ router.post('/:id/exercises', async (req, res) => {
     const exerciseResponse = await exercisesService
       .fetchById(createResponse.statement.lastID);
 
-    res.status(200).json(await {
+    res.status(200).json({
       ...exerciseResponse,
       date: new Date(convertedDate).toDateString(),
     });
   } catch (err) {
-    res.status(400).send({ status: 400, message: 'bad request' });
+    res.status(404).send({ status: 404, message: 'This user id doesn\'t exist' });
   }
 });
 

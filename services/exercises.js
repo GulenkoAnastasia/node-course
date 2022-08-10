@@ -10,7 +10,7 @@ const db = require('../db');
  * @returns
  */
 const fetchList = async (params = undefined) => {
-  let query = 'SELECT * FROM exercises';
+  let query = 'SELECT * FROM exercises ';
   if (params && params.filters) {
     const {
       user_id, from, to, limit,
@@ -28,6 +28,7 @@ const fetchList = async (params = undefined) => {
       }
     }
   }
+  query += ' ORDER BY date DESC';
   try {
     const exercises = await db.all(query);
     const response = exercises.rows.map((exercise) => ({
@@ -35,6 +36,7 @@ const fetchList = async (params = undefined) => {
       duration: exercise.duration,
       date: new Date(exercise.date).toDateString(),
     }));
+
     return response;
   } catch (err) {
     throw new Error('Can\'t get exercises list');
