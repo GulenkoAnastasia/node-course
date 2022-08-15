@@ -26,7 +26,7 @@ router.get('/:id/logs', async (req, res) => {
     res.status(200).json({
       id,
       username: user.name,
-      count: exercises.length,
+      count: await exercisesService.getCountExercises(id),
       log: exercises,
     });
   } catch (err) {

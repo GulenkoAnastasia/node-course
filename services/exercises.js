@@ -75,8 +75,19 @@ const fetchById = async (id) => {
   }
 };
 
+const getCountExercises = async (id) => {
+  const sqlQuery = `SELECT COUNT(*) FROM exercises WHERE user_id=${id}`;
+  try {
+    const response = await db.get(sqlQuery);
+    return response.row['COUNT(*)'];
+  } catch (err) {
+    throw new Error('Can\'t get exercises count');
+  }
+};
+
 module.exports = {
   fetchList,
   create,
   fetchById,
+  getCountExercises,
 };
