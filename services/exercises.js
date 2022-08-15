@@ -21,10 +21,9 @@ const fetchList = async (params = undefined) => {
       if (from && to) {
         query += ` AND date BETWEEN "${from}" AND "${to}"`;
       } else if (from || to) {
-        query += ` AND date ${from ? '>= ' : '<= '}${from ? `"${from}"` : `"${to}"`} ${from ? 'ORDER BY date ASC' : 'ORDER BY date DESC'}`;
-      } else {
-        query += ' ORDER BY date DESC';
+        query += ` AND date ${from ? '>= ' : '<= '}${from ? `"${from}"` : `"${to}"`}`;
       }
+      query += ' ORDER BY date ASC';
 
       if (limit) {
         query += ` LIMIT ${limit}`;
