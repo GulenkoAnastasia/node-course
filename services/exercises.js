@@ -10,7 +10,7 @@ const db = require('../db');
  * @returns
  */
 const fetchList = async (params = undefined) => {
-  let query = 'SELECT * FROM exercises ';
+  let query = 'SELECT * FROM exercises';
   if (params && params.filters) {
     const {
       user_id, from, to, limit,
@@ -23,12 +23,13 @@ const fetchList = async (params = undefined) => {
       } else if (from || to) {
         query += ` AND date ${from ? '> ' : '< '}${from ? `"${from}"` : `"${to}"`}`;
       }
+      query += ' ORDER BY date DESC';
+      
       if (limit) {
         query += ` LIMIT ${limit}`;
       }
     }
   }
-  query += ' ORDER BY date DESC';
   try {
     const exercises = await db.all(query);
     const response = exercises.rows.map((exercise) => ({
